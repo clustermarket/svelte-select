@@ -839,16 +839,17 @@ test('when isSearchable is set returns list of sorted by searchScore', async (t)
     target,
     props: {
       items,
-      searchScore: (items, filterText, option) => label.length
+      isSearchable: true,
+      searchScore: (label, filterText, item) => label.length
     }
   });
 
-  t.ok(select.getFilteredItems().length === 5);
-  t.ok(select.getFilteredItems()[0] === 'cake');
-  t.ok(select.getFilteredItems()[1] === 'chips');
-  t.ok(select.getFilteredItems()[2] === 'pizza');
-  t.ok(select.getFilteredItems()[3] === 'ice-cream');
-  t.ok(select.getFilteredItems()[4] === 'chocolate');
+  t.equal(select.getFilteredItems().length, 5);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'ice-cream');
+  t.equal(select.getFilteredItems()[2].value, 'pizza');
+  t.equal(select.getFilteredItems()[3].value, 'chips');
+  t.equal(select.getFilteredItems()[4].value, 'cake');
 
   select.$destroy();
 });
@@ -858,15 +859,16 @@ test('searchResults restricts the search to the specified number of results', as
     target,
     props: {
       items,
-      itemFilter: (items, filterText) => label.length,
+      isSearchable: true,
+      searchScore: (label, filterText, item) => label.length,
       searchResults: 3
     }
   });
 
-  t.ok(select.getFilteredItems().length === 3);
-  t.ok(select.getFilteredItems()[0] === 'chocolate');
-  t.ok(select.getFilteredItems()[1] === 'ice-cream');
-  t.ok(select.getFilteredItems()[2] === 'pizza');
+  t.equal(select.getFilteredItems().length, 3);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'ice-cream');
+  t.equal(select.getFilteredItems()[2].value, 'pizza');
 
   select.$destroy();
 });
@@ -876,14 +878,15 @@ test('minSearchScore restricts the search to the specified minimum score', async
     target,
     props: {
       items,
-      itemFilter: (items, filterText) => label.length,
+      isSearchable: true,
+      searchScore: (label, filterText, item) => label.length,
       minSearchScore: 6
     }
   });
 
-  t.ok(select.getFilteredItems().length === 2);
-  t.ok(select.getFilteredItems()[0] === 'chocolate');
-  t.ok(select.getFilteredItems()[1] === 'ice-cream');
+  t.equal(select.getFilteredItems().length, 2);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'ice-cream');
 
   select.$destroy();
 });
@@ -899,18 +902,19 @@ test('default searchScore scores string matches higher', async (t) => {
         {value: 'chacolate', label: 'chacolate'},
         {value: 'buzz', label: 'buzz'},
       ],
-      itemFilter: (items, filterText) => label.length
+      isSearchable: true,
+      searchScore: (label, filterText, item) => label.length
     }
   });
 
-  t.ok(select.getFilteredItems().length === 5);
+  t.equal(select.getFilteredItems().length, 5);
   select.filterText = 'chocolate';
-  t.ok(select.getFilteredItems().length === 5);
-  t.ok(select.getFilteredItems()[0] === 'chocolate');
-  t.ok(select.getFilteredItems()[1] === 'chocolatte');
-  t.ok(select.getFilteredItems()[2] === 'choclate');
-  t.ok(select.getFilteredItems()[3] === 'chacolate');
-  t.ok(select.getFilteredItems()[4] === 'buzz');
+  t.equal(select.getFilteredItems().length, 5);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'chocolatte');
+  t.equal(select.getFilteredItems()[2].value, 'choclate');
+  t.equal(select.getFilteredItems()[3].value, 'chacolate');
+  t.equal(select.getFilteredItems()[4].value, 'buzz');
 
   select.$destroy();
 });
