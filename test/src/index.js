@@ -834,6 +834,87 @@ test('Select filter text filters list with itemFilter', async (t) => {
   select.$destroy();
 });
 
+test('when isSearchable is set returns list of sorted by searchScore', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      searchScore: (items, filterText, option) => label.length
+    }
+  });
+
+  t.ok(select.getFilteredItems().length === 5);
+  t.ok(select.getFilteredItems()[0] === 'cake');
+  t.ok(select.getFilteredItems()[1] === 'chips');
+  t.ok(select.getFilteredItems()[2] === 'pizza');
+  t.ok(select.getFilteredItems()[3] === 'ice-cream');
+  t.ok(select.getFilteredItems()[4] === 'chocolate');
+
+  select.$destroy();
+});
+
+test('searchResults restricts the search to the specified number of results', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      itemFilter: (items, filterText) => label.length,
+      searchResults: 3
+    }
+  });
+
+  t.ok(select.getFilteredItems().length === 3);
+  t.ok(select.getFilteredItems()[0] === 'chocolate');
+  t.ok(select.getFilteredItems()[1] === 'ice-cream');
+  t.ok(select.getFilteredItems()[2] === 'pizza');
+
+  select.$destroy();
+});
+
+test('minSearchScore restricts the search to the specified minimum score', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      itemFilter: (items, filterText) => label.length,
+      minSearchScore: 6
+    }
+  });
+
+  t.ok(select.getFilteredItems().length === 2);
+  t.ok(select.getFilteredItems()[0] === 'chocolate');
+  t.ok(select.getFilteredItems()[1] === 'ice-cream');
+
+  select.$destroy();
+});
+
+test('default searchScore scores string matches higher', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items: [
+        {value: 'chocolate', label: 'Chocolate'},
+        {value: 'chocolatte', label: 'Chocolatte'},
+        {value: 'choclate', label: 'Choclate'},
+        {value: 'chacolate', label: 'chacolate'},
+        {value: 'buzz', label: 'buzz'},
+      ],
+      itemFilter: (items, filterText) => label.length
+    }
+  });
+
+  t.ok(select.getFilteredItems().length === 5);
+  select.filterText = 'chocolate';
+  t.ok(select.getFilteredItems().length === 5);
+  t.ok(select.getFilteredItems()[0] === 'chocolate');
+  t.ok(select.getFilteredItems()[1] === 'chocolatte');
+  t.ok(select.getFilteredItems()[2] === 'choclate');
+  t.ok(select.getFilteredItems()[3] === 'chacolate');
+  t.ok(select.getFilteredItems()[4] === 'buzz');
+
+  select.$destroy();
+});
+
 test('Typing in the Select filter opens List', async (t) => {
   const select = new Select({
     target,
@@ -1125,7 +1206,7 @@ test('should not be able to clear when clearing is disabled', async (t) => {
   select.$destroy();
 });
 
-test('should not be able to search when searching is disabled', async (t) => {
+test('should not be able to filter when filtering is disabled', async (t) => {
   const select = new Select({
     target,
     props: {
@@ -1140,7 +1221,23 @@ test('should not be able to search when searching is disabled', async (t) => {
   select.$destroy();
 });
 
-test('should display indicator when searching is disabled', async (t) => {
+test('should not be able to search when searching is disabled', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      isFilterable: false,
+      isSearchable: false
+    }
+  });
+
+  const selectInput = document.querySelector('.selectContainer input');
+  t.ok(selectInput.attributes.readonly);
+
+  select.$destroy();
+});
+
+test('should display indicator when filtering is disabled', async (t) => {
   const div = document.createElement('div');
   document.body.appendChild(div);
 
@@ -1149,6 +1246,24 @@ test('should display indicator when searching is disabled', async (t) => {
     props: {
       items,
       isFilterable: false
+    }
+  });
+
+  t.ok(document.querySelector('.indicator'));
+
+  select.$destroy();
+});
+
+test('should display indicator when searching is disabled', async (t) => {
+  const div = document.createElement('div');
+  document.body.appendChild(div);
+
+  const select = new Select({
+    target,
+    props: {
+      items,
+      isFilterable: false,
+      isSearchable: false
     }
   });
 
@@ -3236,6 +3351,22 @@ test('when isFilterable is false then input should be readonly', async (t) => {
     props: {
       items,
       isFilterable: false
+    }
+  });
+
+  let elem = target.querySelector('.selectContainer input');
+  t.ok(elem.hasAttribute('readonly'));
+
+  select.$destroy();
+});
+
+test('when isSearchable is false then input should be readonly', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      isFilterable: false,
+      isSearchable: false,
     }
   });
 

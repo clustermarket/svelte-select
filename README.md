@@ -47,7 +47,7 @@ yarn add svelte-select
 - `id: String` Default: `null`. Add an id to the input field.
 - `items: Array` Default: `[]`. List of selectable items that appear in the dropdown.
 - `value: Any` Default: `null`. Selected item or items.
-- `filterText: String` Default: `''`. Text to filter `items` by.
+- `filterText: String` Default: `''`. Text to filtering and searching `items` by.
 - `placeholder: String` Default: `'Select...'`. Placeholder text.
 - `noOptionsMessage: String` Default: `'No options'`. Message to display in list when there are no `items`.
 - `optionIdentifier: String` Default: `'value'`. Override default identifier.
@@ -168,7 +168,19 @@ To load items asynchronously then `loadOptions` is the simplest solution. Supply
 These internal functions are exposed to override if needed. See the adv demo or look through the test file (test/src/index.js) for examples.
 
 ```js
-export let itemFilter = (label, filterText, option) => label.toLowerCase().includes(filterText.toLowerCase());
+export let itemFilter = (label, filterText, item) => label.toLowerCase().includes(filterText.toLowerCase());
+```
+
+```js
+export let searchScore = (label, filterText, item) => {
+  let matches = 0;
+  label = label.toLowerCase().trim();
+  filterText = filterText.toLowerCase().trim();
+  for (let i = 0; i < label.length && i < filterText.length; ++i){
+    if (label[i] == filterText[i]) matches++;
+  }
+  return matches;
+};
 ```
 
 ```js
@@ -316,6 +328,15 @@ You can also use the `inputStyles` prop to write in any override styles needed f
 
 <Select {items} on:select={handleSelect} on:clear={handleClear}></Select>
 ```
+
+## Filtering and searching
+
+There are two subtle differences between filtering and searching.
+ 1. Filtering is binary - an item is either shown or hidden, while searching is numeric.
+      Search results are sorted according to a numeric score.
+ 2. Filtering is performed on item-filterText basis, while for searching, the search function is
+      provided the full collection of items to search against and score. The result is supposed to
+      be sorted.
 
 ## Development
 
