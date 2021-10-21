@@ -30,8 +30,10 @@ export interface SelectProps {
   getSelectionLabel?: (option: any) => string;
   createGroupHeaderItem?: (groupValue: any) => any;
   createItem?: (filterText: string) => any;
-  isSearchable?: boolean;
   isFilterable?: boolean;
+  isSearchable?: boolean;
+  minSearchScore?: number;
+  searchResults?: number;
   inputStyles?: string;
   isClearable?: boolean;
   isWaiting?: boolean;

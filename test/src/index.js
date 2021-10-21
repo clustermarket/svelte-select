@@ -1125,12 +1125,13 @@ test('should not be able to clear when clearing is disabled', async (t) => {
   select.$destroy();
 });
 
-test('should not be able to search when searching is disabled', async (t) => {
+test('should not be able to search when filtering and searching are disabled', async (t) => {
   const select = new Select({
     target,
     props: {
       items,
-      isFilterable: false
+      isFilterable: false,
+      isSearchable: false
     }
   });
 
@@ -1140,7 +1141,7 @@ test('should not be able to search when searching is disabled', async (t) => {
   select.$destroy();
 });
 
-test('should display indicator when searching is disabled', async (t) => {
+test('should display indicator when searching and filtering are disabled', async (t) => {
   const div = document.createElement('div');
   document.body.appendChild(div);
 
@@ -1148,7 +1149,8 @@ test('should display indicator when searching is disabled', async (t) => {
     target,
     props: {
       items,
-      isFilterable: false
+      isFilterable: false,
+      isSearchable: false
     }
   });
 
@@ -3230,12 +3232,13 @@ test('when switching between isMulti true/false ensure Select continues working'
   select.$destroy();
 });
 
-test('when isFilterable is false then input should be readonly', async (t) => {
+test('when isFilterable and isSearchable are false then input should be readonly', async (t) => {
   const select = new Select({
     target,
     props: {
       items,
-      isFilterable: false
+      isFilterable: false,
+      isSearchable: false
     }
   });
 
@@ -3766,6 +3769,94 @@ test('When id supplied then add to input', async (t) => {
   let aria = document.querySelector('input[type="text"]');
   t.equal(aria.id, 'foods');
     
+  select.$destroy();
+});
+
+test('when isSearchable is set returns list sorted by searchScore', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      isSearchable: true,
+      searchScore: (label, filterText, item) => label.length
+    }
+  });
+
+  t.equal(select.getFilteredItems().length, 5);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'ice-cream');
+  t.equal(select.getFilteredItems()[2].value, 'pizza');
+  t.equal(select.getFilteredItems()[3].value, 'chips');
+  t.equal(select.getFilteredItems()[4].value, 'cake');
+
+  select.$destroy();
+});
+
+test('searchResults restricts the search to the specified number of results', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      isSearchable: true,
+      searchScore: (label, filterText, item) => label.length,
+      searchResults: 3
+    }
+  });
+
+  t.equal(select.getFilteredItems().length, 3);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'ice-cream');
+  t.equal(select.getFilteredItems()[2].value, 'pizza');
+
+  select.$destroy();
+});
+
+test('minSearchScore restricts the search to the specified minimum score', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items,
+      isSearchable: true,
+      searchScore: (label, filterText, item) => label.length,
+      minSearchScore: 6
+    }
+  });
+
+  t.equal(select.getFilteredItems().length, 2);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'ice-cream');
+
+  select.$destroy();
+});
+
+test('default searchScore scores string matches higher', async (t) => {
+  const select = new Select({
+    target,
+    props: {
+      items: [
+        {value: 'buzzolat', label: 'buzzolat'},
+        {value: 'buzz', label: 'buzz'},
+        {value: 'choclate', label: 'Choclate'},
+        {value: 'fuzzz', label: 'fuzzz'},
+        {value: 'chofuzzz', label: 'chofuzzz'},
+        {value: 'chocolatte', label: 'Chocolatte'},
+        {value: 'chocolate', label: 'Chocolate'},
+        {value: 'chacolate', label: 'chacolate'},
+      ],
+      searchResults: 4,
+      minSearchScore: 4,
+      isSearchable: true
+    }
+  });
+
+  t.equal(select.getFilteredItems().length, 4);
+  select.filterText = 'chocolate';
+  t.equal(select.getFilteredItems().length, 4);
+  t.equal(select.getFilteredItems()[0].value, 'chocolate');
+  t.equal(select.getFilteredItems()[1].value, 'chocolatte');
+  t.equal(select.getFilteredItems()[2].value, 'chacolate');
+  t.equal(select.getFilteredItems()[3].value, 'buzzolat');
+
   select.$destroy();
 });
 
