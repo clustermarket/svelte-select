@@ -65,7 +65,8 @@
         return filteredItems;
     };
 
-    export let isSearchable = true;
+    export let isSearchable; // Deprecated. Use isFilterable instead.
+    export let isFilterable = true;
     export let inputStyles = '';
     export let isClearable = true;
     export let isWaiting = false;
@@ -92,6 +93,15 @@
     export let Selection = _Selection;
     export let MultiSelection = _MultiSelection;
     export let VirtualList = _VirtualList;
+
+    $: {
+        if (isSearchable !== undefined) {
+            isFilterable = isSearchable;
+            console.warn(
+                'isSearchable is deprecated and will change in the future. Use isFilterable instead.'
+            );
+        }
+    }
 
     function filterMethod(args) {
         if (args.loadOptions && args.filterText.length > 0) return;
@@ -236,7 +246,7 @@
             _inputAttributes.id = id;
         }
 
-        if (!isSearchable) {
+        if (!isFilterable) {
             _inputAttributes.readonly = true;
         }
     }
@@ -333,7 +343,7 @@
     }
 
     $: {
-        if (inputAttributes || !isSearchable) assignInputAttributes();
+        if (inputAttributes || !isFilterable) assignInputAttributes();
     }
 
     $: {
@@ -896,7 +906,7 @@
     {/if}
 
     <input
-        readOnly={!isSearchable}
+        readOnly={!isFilterable}
         {..._inputAttributes}
         bind:this={input}
         on:focus={handleFocus}
@@ -923,7 +933,7 @@
         </div>
     {/if}
 
-    {#if !showClearIcon && (showIndicator || (showChevron && !value) || (!isSearchable && !isDisabled && !isWaiting && ((showSelectedItem && !isClearable) || !showSelectedItem)))}
+    {#if !showClearIcon && (showIndicator || (showChevron && !value) || (!isFilterable && !isDisabled && !isWaiting && ((showSelectedItem && !isClearable) || !showSelectedItem)))}
         <div class="indicator" aria-hidden="true">
             {#if indicatorSvg}
                 {@html indicatorSvg}
